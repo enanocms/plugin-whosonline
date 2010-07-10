@@ -65,28 +65,38 @@ function __WhosOnline_UserCount()
   $num_guests = 0;
   $num_users = 0;
   $users = Array();
-  while ( $row = $db->fetchrow() )
+  while ( $row = $db->fetchrow($q) )
   {
     ( $row['user_id'] == 1 ) ? $num_guests++ : $num_users++;
     if($row['user_id'] > 1)
     {
-      switch($row['user_level'])
-      {
-        case USER_LEVEL_MEMBER:
-        default:
-          $color = '303030';
-          $weight = 'normal';
-          break;
-        case USER_LEVEL_MOD:
-          $color = '00AA00';
-          $weight = 'bold';
-          break;
-        case USER_LEVEL_ADMIN:
-          $color = 'AA0000';
-          $weight = 'bold';
-          break;
-      }
-      $users[] = "<a href='".makeUrlNS('User', str_replace(' ', '_', $row['username']))."' style='color: #$color; font-weight: $weight'>{$row['username']}</a>";
+    	if ( defined('RANK_ID_MEMBER') )
+    	{
+    		// We're in an Enano with rank support
+    		$rankinfo = $session->get_user_rank($row['user_id']);
+    		$rank_style = $rankinfo['rank_style'];
+    	}
+    	else
+    	{
+		  switch($row['user_level'])
+		  {
+			case USER_LEVEL_MEMBER:
+			default:
+			  $color = '303030';
+			  $weight = 'normal';
+			  break;
+			case USER_LEVEL_MOD:
+			  $color = '00AA00';
+			  $weight = 'bold';
+			  break;
+			case USER_LEVEL_ADMIN:
+			  $color = 'AA0000';
+			  $weight = 'bold';
+			  break;
+		  }
+		  $rank_style = "color: #$color; font-weight: $weight";
+		}
+      $users[] = "<a href='".makeUrlNS('User', str_replace(' ', '_', $row['username']))."' style=\"$rank_style\">{$row['username']}</a>";
       $whos_online['users'][] = $row['username'];
     }
     else
